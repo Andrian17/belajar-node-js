@@ -23,7 +23,7 @@ const addNoteHandler = (request, h) => {
   if (isSuccess) {
     const response = h.response({
       status: "success",
-      message: "Catatan Telah Ditambahkan",
+      message: "Catatan berhasil ditambahkan",
       data: {
         noteId: id,
       },
@@ -44,4 +44,97 @@ const addNoteHandler = (request, h) => {
   return response;
 };
 
-module.exports = { addNoteHandler };
+const getAllNotesHandler = () => ({
+  status: "success",
+  data: {
+    notes,
+  },
+});
+
+const editByIdHandler = (req, h) => {
+  const { id } = req.params;
+
+  const { title, tags, body } = req.payload;
+  const updatedAt = new Date().toISOString();
+  const index = notes.findIndex((note) => note.id === id);
+
+  console.log(index);
+
+  if (index !== -1) {
+    notes[index] = {
+      ...notes[index],
+      title,
+      tags,
+      body,
+      updatedAt,
+    };
+
+    const response = h.response({
+      status: "success",
+      message: "Catatan Telah diperbarui",
+    });
+    response.code(200);
+    return response;
+  }
+
+  const response = h.response({
+    status: "fail",
+    message: "Gagal memperbarui notes, Id tidak valid",
+  });
+
+  response.code(404);
+  return response;
+};
+
+const getNoteByIdHandler = (req, h) => {
+  const { id } = req.params;
+  const note = notes.filter((n) => n.id === id)[0];
+
+  if (note !== undefined) {
+    return {
+      status: "success",
+      data: {
+        note,
+      },
+    };
+  }
+
+  const response = h.response({
+    status: "fail",
+    message: "Catatan tidak ditemukan",
+  });
+
+  response.code(404);
+  return response;
+};
+
+const deleteNoteById = (req, h) => {
+  const { id } = req.params;
+  const index = notes.findIndex((note) => note.id === id);
+  console.log(id);
+  console.log(index);
+  if (index !== 1) {
+    notes.splice(index, 1);
+    const response = h.response({
+      status: "success",
+      message: "Catatan Telah Dihapus",
+    });
+    response.code(200);
+    return response;
+  }
+
+  const response = h.response({
+    status: "fail",
+    message: "Catatan Gagal dihapus, Id tidak Valid",
+  });
+  response.code(404);
+  return response;
+};
+
+module.exports = {
+  addNoteHandler,
+  getAllNotesHandler,
+  getNoteByIdHandler,
+  editByIdHandler,
+  deleteNoteById,
+};
